@@ -1,0 +1,10 @@
+# IDE
+.local
+.vscode
+.idea
+
+# artifacts
+__debug*
+
+# credentials
+.env
