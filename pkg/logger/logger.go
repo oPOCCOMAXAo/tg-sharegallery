@@ -29,6 +29,7 @@ func NewDefault() *slog.Logger {
 	}))
 }
 
+//nolint:mnd
 func NewDebug() *slog.Logger {
 	return slog.New(devslog.NewHandler(os.Stdout, &devslog.Options{
 		MaxErrorStackTrace: 10,

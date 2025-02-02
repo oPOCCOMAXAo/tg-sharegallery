@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
+	"github.com/opoccomaxao/tg-sharegallery/pkg/views"
 )
 
 func (s *Service) Start(
@@ -22,8 +23,9 @@ func (s *Service) Start(
 		return
 	}
 
-	menu, err := s.getPageResult(ctx, MenuParams{
-		Page: PageMain,
+	menu, _, err := s.getMenuPageResult(ctx, ViewParams{
+		Page:   views.MenuPageHelp,
+		ChatID: update.Message.Chat.ID,
 	})
 	if err != nil {
 		s.logger.ErrorContext(ctx, "Start",
@@ -33,10 +35,7 @@ func (s *Service) Start(
 		return
 	}
 
-	_, _ = router.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID:      update.Message.Chat.ID,
-		Text:        menu.Text,
-		ParseMode:   models.ParseModeHTML,
-		ReplyMarkup: menu.ReplyMarkup,
-	})
+	if menu != nil {
+		_, _ = router.SendMessage(ctx, menu.SendMessageParams())
+	}
 }

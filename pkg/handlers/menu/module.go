@@ -26,7 +26,6 @@ type moduleResults struct {
 
 	StartTextHandler    internal.TextHandler     `group:"handlers"`
 	HelpTextHandler     internal.TextHandler     `group:"handlers"`
-	TestTextHandler     internal.TextHandler     `group:"handlers"`
 	MenuCallbackHandler internal.CallbackHandler `group:"handlers"`
 }
 
@@ -46,10 +45,6 @@ func module(
 		WithDescription(models.CSAllPrivateChats, models.LCUk, "Допомога").
 		WithMiddleware(middleware.MustHaveMessage).
 		Text("/help", bot.MatchTypeExact)
-
-	res.TestTextHandler = internal.NewRawHandler(params.Service.Test).
-		WithMiddleware(middleware.MustHaveMessage).
-		Text("/test", bot.MatchTypePrefix)
 
 	res.MenuCallbackHandler = internal.NewRawHandler(params.Service.Menu).
 		WithMiddleware(middleware.MustHaveCallback).

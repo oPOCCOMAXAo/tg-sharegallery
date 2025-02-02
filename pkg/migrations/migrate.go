@@ -8,6 +8,24 @@ import (
 	"gorm.io/gorm"
 )
 
+type User struct {
+	models.User
+
+	CurrentAlbum *Album `gorm:"foreignKey:CurrentAlbumID"`
+}
+
+type Album struct {
+	models.Album
+
+	Owner *User `gorm:"foreignKey:OwnerID"`
+}
+
+type AlbumImage struct {
+	models.AlbumImage
+
+	Album *Album `gorm:"foreignKey:AlbumID"`
+}
+
 func Migrate(
 	ctx context.Context,
 	dbOrig *gorm.DB,
@@ -15,7 +33,9 @@ func Migrate(
 	db := dbOrig.WithContext(ctx)
 
 	err := db.AutoMigrate(
-		&models.User{},
+		&User{},
+		&Album{},
+		&AlbumImage{},
 	)
 	if err != nil {
 		return errors.WithStack(err)

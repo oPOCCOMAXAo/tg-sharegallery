@@ -7,17 +7,13 @@ import (
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/texts"
-	"github.com/pkg/errors"
+	"github.com/opoccomaxao/tg-sharegallery/pkg/views"
 )
 
-type MenuParams struct {
-	Page Page
-}
-
-type MenuResults struct {
-	Text             string
-	CallbackResponse string
-	ReplyMarkup      *models.InlineKeyboardMarkup
+type ViewParams struct {
+	Page    views.MenuPage
+	ChatID  int64
+	QueryID string
 }
 
 func (s *Service) Menu(
@@ -25,12 +21,15 @@ func (s *Service) Menu(
 	router *bot.Bot,
 	update *models.Update,
 ) {
-	var req MenuParams
+	req := ViewParams{
+		ChatID:  update.CallbackQuery.Message.Message.From.ID,
+		QueryID: update.CallbackQuery.ID,
+	}
 
 	params := texts.DecodeQuery(update.CallbackQuery.Data)
 	params.GetStringInto("page", (*string)(&req.Page))
 
-	res, err := s.getPageResult(ctx, req)
+	menu, cb, err := s.getMenuPageResult(ctx, req)
 	if err != nil {
 		s.logger.ErrorContext(ctx, "Menu",
 			slog.Any("error", err),
@@ -39,95 +38,46 @@ func (s *Service) Menu(
 		return
 	}
 
-	_, err = router.EditMessageText(ctx, &bot.EditMessageTextParams{
-		ChatID:      update.CallbackQuery.Message.Message.Chat.ID,
-		MessageID:   update.CallbackQuery.Message.Message.ID,
-		Text:        res.Text,
-		ParseMode:   models.ParseModeHTML,
-		ReplyMarkup: res.ReplyMarkup,
-	})
-	if err != nil {
-		s.logger.ErrorContext(ctx, "Menu",
-			slog.Any("error", errors.WithStack(err)),
-		)
-
-		return
+	if menu != nil {
+		_, _ = router.EditMessageText(ctx, menu.EditMessageTextParams())
 	}
 
-	if res.CallbackResponse != "" {
-		_, err = router.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
-			CallbackQueryID: update.CallbackQuery.ID,
-			Text:            res.CallbackResponse,
-			ShowAlert:       true,
-			CacheTime:       300,
-		})
-		if err != nil {
-			s.logger.ErrorContext(ctx, "Menu",
-				slog.Any("error", errors.WithStack(err)),
-			)
-		}
+	if cb != nil {
+		_, _ = router.AnswerCallbackQuery(ctx, cb.AnswerCallbackQueryParams())
 	}
 }
 
-func (s *Service) getPageResult(
+//nolint:revive,unparam // these params will be used in the future.
+func (s *Service) getMenuPageResult(
 	ctx context.Context,
-	params MenuParams,
-) (*MenuResults, error) {
-	var res MenuResults
-
-	var btnHelp, btnMain, btnGallery bool
-
-	var keyboard [][]models.InlineKeyboardButton
+	params ViewParams,
+) (*views.Menu, *views.Callback, error) {
+	var (
+		menu *views.Menu
+		cb   *views.Callback
+	)
 
 	switch params.Page {
-	case PageMain:
-		res.Text = "Bot description"
-		btnHelp = true
-		btnGallery = true
-	case PageHelp:
-		res.Text = "Help"
-		btnMain = true
-		btnGallery = true
+	case views.MenuPageMain:
+		menu = &views.Menu{
+			Text:       "Bot description",
+			ChatID:     params.ChatID,
+			ShowHelp:   true,
+			ShowAlbums: true,
+		}
+	case views.MenuPageHelp:
+		menu = &views.Menu{
+			Text:       "Help",
+			ChatID:     params.ChatID,
+			ShowMain:   true,
+			ShowAlbums: true,
+		}
 	default:
-		res.CallbackResponse = "Unknown page"
-	}
-
-	if btnHelp {
-		keyboard = append(keyboard, []models.InlineKeyboardButton{{
-			Text: "Help",
-			CallbackData: texts.QueryCommand("menu").
-				AddParam("page", string(PageHelp)).
-				Encode(),
-		}})
-	}
-
-	if btnMain {
-		keyboard = append(keyboard, []models.InlineKeyboardButton{{
-			Text: "Main",
-			CallbackData: texts.QueryCommand("menu").
-				AddParam("page", string(PageMain)).
-				Encode(),
-		}})
-	}
-
-	if btnGallery {
-		keyboard = append(keyboard, []models.InlineKeyboardButton{
-			{
-				Text:         "New gallery",
-				CallbackData: "newgallery",
-			},
-			{
-				Text:         "My galleries",
-				CallbackData: "mygalleries",
-			},
-		})
-	}
-
-	if len(keyboard) > 0 {
-		res.ReplyMarkup = &models.InlineKeyboardMarkup{
-			InlineKeyboard: keyboard,
+		cb = &views.Callback{
+			Text:    "Unknown page",
+			QueryID: params.QueryID,
 		}
 	}
 
-	return &res, nil
+	return menu, cb, nil
 }

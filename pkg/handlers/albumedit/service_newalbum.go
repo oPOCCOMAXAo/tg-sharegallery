@@ -1,4 +1,4 @@
-package menu
+package albumedit
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/go-telegram/bot/models"
 )
 
-func (s *Service) Test(
+func (s *Service) NewAlbum(
 	ctx context.Context,
 	router *bot.Bot,
 	update *models.Update,
