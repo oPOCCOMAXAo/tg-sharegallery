@@ -8,27 +8,27 @@ import (
 func Module() fx.Option {
 	return fx.Module("handlers/albumedit",
 		fx.Provide(fx.Private, NewService),
-		fx.Provide(module),
+		fx.Provide(Handlers),
 	)
 }
 
-type moduleParams struct {
+type HandlersParams struct {
 	fx.In
 
 	Service *Service
 }
 
-type moduleResults struct {
+type HandlersResults struct {
 	fx.Out
 
 	NewAlbum   internal.TextHandler     `group:"handlers"`
 	NewAlbumCB internal.CallbackHandler `group:"handlers"`
 }
 
-func module(
-	params moduleParams,
-) (moduleResults, error) {
-	var res moduleResults
+func Handlers(
+	params HandlersParams,
+) (HandlersResults, error) {
+	var res HandlersResults
 
 	return res, nil
 }

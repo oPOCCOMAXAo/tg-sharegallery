@@ -11,17 +11,17 @@ import (
 func Module() fx.Option {
 	return fx.Module("handlers/menu",
 		fx.Provide(fx.Private, NewService),
-		fx.Provide(module),
+		fx.Provide(Handlers),
 	)
 }
 
-type moduleParams struct {
+type HandlersParams struct {
 	fx.In
 
 	Service *Service
 }
 
-type moduleResults struct {
+type HandlersResults struct {
 	fx.Out
 
 	StartTextHandler    internal.TextHandler     `group:"handlers"`
@@ -29,10 +29,10 @@ type moduleResults struct {
 	MenuCallbackHandler internal.CallbackHandler `group:"handlers"`
 }
 
-func module(
-	params moduleParams,
-) (moduleResults, error) {
-	var res moduleResults
+func Handlers(
+	params HandlersParams,
+) (HandlersResults, error) {
+	var res HandlersResults
 
 	res.StartTextHandler = internal.NewRawHandler(params.Service.Start).
 		WithDescription(models.CSAllPrivateChats, models.LCEn, "Start").
