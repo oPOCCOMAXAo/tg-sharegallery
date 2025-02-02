@@ -2,20 +2,26 @@ package tg
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
+	"github.com/opoccomaxao/tg-sharegallery/pkg/logger"
 	xmodels "github.com/opoccomaxao/tg-sharegallery/pkg/models"
+	"github.com/opoccomaxao/tg-sharegallery/pkg/texts"
+	"github.com/opoccomaxao/tg-sharegallery/pkg/tg/internal"
 	"github.com/pkg/errors"
 )
 
 type Service struct {
 	config Config
+	logger *slog.Logger
 	client *bot.Bot
 	runCtx context.Context //nolint:containedctx
 	cancel context.CancelFunc
+
+	describer *texts.CommandDescriber
 }
 
 type Config struct {
@@ -28,9 +34,13 @@ type Config struct {
 
 func New(
 	config Config,
+	logger *slog.Logger,
 ) (*Service, error) {
 	res := Service{
 		config: config,
+		logger: logger,
+
+		describer: texts.NewCommandDescriber(),
 	}
 
 	err := res.initClient()
@@ -45,8 +55,10 @@ func (s *Service) initClient() error {
 	var err error
 
 	opts := []bot.Option{
-		bot.WithDefaultHandler(s.defaultHandler),
 		bot.WithSkipGetMe(),
+		bot.WithDefaultHandler(s.telemetry(internal.HandlerTypeUnknown, "")(s.defaultHandler)),
+		bot.WithDebugHandler(logger.AsPrintf(s.logger.Debug)),
+		bot.WithErrorsHandler(s.ErrorHandler),
 	}
 
 	if s.config.Debug {
@@ -69,6 +81,8 @@ func (s *Service) OnStart(ctx context.Context) error {
 	if s.config.NoInit {
 		return nil
 	}
+
+	s.setupCommands(ctx)
 
 	ok, err := s.client.SetWebhook(ctx, &bot.SetWebhookParams{
 		URL:         s.config.HookURL,
@@ -102,28 +116,12 @@ func (s *Service) WebhookHandler() http.HandlerFunc {
 	return s.client.WebhookHandler()
 }
 
-func (s *Service) defaultHandler(ctx context.Context, _ *bot.Bot, update *models.Update) {
-	if update.Message != nil {
-		s.logMessage(ctx, update.Message)
-	}
-
-	if update.CallbackQuery != nil {
-		s.logCallback(ctx, update.CallbackQuery)
-	}
+func (s *Service) ErrorHandler(err error) {
+	s.logger.Error("tg error", slog.Any("error", err))
 }
 
-func (s *Service) logMessage(_ context.Context, msg *models.Message) {
-	log.Printf("%d @%s: %s",
-		msg.From.ID,
-		msg.From.Username,
-		msg.Text,
-	)
-}
-
-func (s *Service) logCallback(_ context.Context, cb *models.CallbackQuery) {
-	log.Printf("%d @%s: %s",
-		cb.From.ID,
-		cb.From.Username,
-		cb.Data,
-	)
+func (s *Service) defaultHandler(
+	_ context.Context,
+	_ *bot.Bot,
+	_ *models.Update) {
 }

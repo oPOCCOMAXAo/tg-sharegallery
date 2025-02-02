@@ -1,10 +1,14 @@
 package tg
 
-import "go.uber.org/fx"
+import (
+	"log/slog"
+
+	"go.uber.org/fx"
+)
 
 func Module() fx.Option {
 	return fx.Module("tg",
-		fx.Provide(moduleProvide),
+		fx.Provide(newModule),
 	)
 }
 
@@ -13,6 +17,7 @@ type moduleParams struct {
 	fx.Lifecycle
 
 	Config Config
+	Logger *slog.Logger
 }
 
 type moduleResult struct {
@@ -21,7 +26,7 @@ type moduleResult struct {
 	Service *Service
 }
 
-func moduleProvide(
+func newModule(
 	params moduleParams,
 ) (moduleResult, error) {
 	var (
@@ -29,7 +34,10 @@ func moduleProvide(
 		err error
 	)
 
-	res.Service, err = New(params.Config)
+	res.Service, err = New(
+		params.Config,
+		params.Logger,
+	)
 	if err != nil {
 		return res, err
 	}

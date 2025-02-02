@@ -2,13 +2,15 @@ package app
 
 import (
 	"context"
-	"log"
+	"log/slog"
 
 	"go.uber.org/fx"
+	"go.uber.org/fx/fxevent"
 )
 
 func NewCancelCause(
 	shutdowner fx.Shutdowner,
+	logger *slog.Logger,
 ) context.CancelCauseFunc {
 	return func(err error) {
 		exitCode := 0
@@ -16,14 +18,26 @@ func NewCancelCause(
 		if err != nil {
 			exitCode = 1
 
-			log.Printf("%+v", err)
+			logger.Error("CancelCause",
+				slog.Any("error", err),
+			)
 		}
 
 		err = shutdowner.Shutdown(
 			fx.ExitCode(exitCode),
 		)
 		if err != nil {
-			log.Printf("%+v", err)
+			logger.Error("CancelCause",
+				slog.Any("error", err),
+			)
 		}
+	}
+}
+
+func NewFxLogger(
+	logger *slog.Logger,
+) fxevent.Logger {
+	return &fxevent.SlogLogger{
+		Logger: logger,
 	}
 }

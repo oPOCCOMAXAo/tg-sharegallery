@@ -2,6 +2,8 @@ package config
 
 import (
 	"github.com/caarlos0/env/v11"
+	"github.com/opoccomaxao/tg-sharegallery/pkg/db"
+	"github.com/opoccomaxao/tg-sharegallery/pkg/logger"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/server"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/tg"
 	"github.com/pkg/errors"
@@ -17,7 +19,9 @@ func Module() fx.Option {
 type Config struct {
 	fx.Out
 
+	Logger logger.Config `envPrefix:"LOGGER_"`
 	Server server.Config `envPrefix:"SERVER_"`
+	DB     db.Config     `envPrefix:"DB_"`
 	TG     tg.Config     `envPrefix:"TG_"`
 }
 

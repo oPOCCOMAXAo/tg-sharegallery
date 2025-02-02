@@ -123,3 +123,4 @@ linters-settings:
       - wg
       - fn
       - ok
+      - tx
