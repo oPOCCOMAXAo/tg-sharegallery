@@ -15,8 +15,17 @@ const (
 )
 
 type Query struct {
-	Texts  []string
-	Params map[string][]string
+	Command string
+	Texts   []string
+	Params  map[string][]string
+}
+
+func QueryCommand(command string) *Query {
+	return &Query{
+		Command: command,
+		Texts:   nil,
+		Params:  make(map[string][]string),
+	}
 }
 
 func QueryFromParams(params map[string][]string) *Query {
@@ -24,6 +33,24 @@ func QueryFromParams(params map[string][]string) *Query {
 		Texts:  nil,
 		Params: params,
 	}
+}
+
+func (q *Query) AddText(text string) *Query {
+	q.Texts = append(q.Texts, text)
+
+	return q
+}
+
+func (q *Query) AddCommand(command string) *Query {
+	q.Command = command
+
+	return q
+}
+
+func (q *Query) AddParam(key string, value string) *Query {
+	q.Params[key] = append(q.Params[key], value)
+
+	return q
 }
 
 func (q *Query) GetTextsSlice() []string {
@@ -121,7 +148,11 @@ func (q *Query) GetStringSlice(key string) ([]string, bool) {
 }
 
 func (q *Query) Encode() string {
-	parts := make([]string, 0, len(q.Texts)+len(q.Params))
+	parts := make([]string, 0, 1+len(q.Texts)+len(q.Params))
+
+	if q.Command != "" {
+		parts = append(parts, q.Command)
+	}
 
 	params := make([]string, 0, len(q.Params))
 
@@ -146,6 +177,7 @@ func (q *Query) Encode() string {
 	return strings.Join(parts, QueryWordDelimiter)
 }
 
+//nolint:mnd
 func DecodeQuery(query string) Query {
 	words := strings.Split(query, QueryWordDelimiter)
 

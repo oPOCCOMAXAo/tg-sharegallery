@@ -1,4 +1,4 @@
-package texts
+package menu
 
 import (
 	"log/slog"

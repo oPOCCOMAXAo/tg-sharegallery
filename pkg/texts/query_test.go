@@ -104,6 +104,15 @@ func TestQuery_Encode(t *testing.T) {
 			},
 			output: "/empty with texts text2",
 		},
+		{
+			input: Query{
+				Command: "command",
+				Params: map[string][]string{
+					"empty": {},
+				},
+			},
+			output: "command /empty",
+		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.output, func(t *testing.T) {

@@ -6,14 +6,14 @@ import (
 
 	"github.com/go-telegram/bot"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/handlers/internal"
-	"github.com/opoccomaxao/tg-sharegallery/pkg/handlers/texts"
+	"github.com/opoccomaxao/tg-sharegallery/pkg/handlers/menu"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/tg"
 	"go.uber.org/fx"
 )
 
 func Invoke() fx.Option {
 	return fx.Module("handlers",
-		texts.Module(),
+		menu.Module(),
 		fx.Invoke(RegisterHandlers),
 	)
 }
