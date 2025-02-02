@@ -4,6 +4,7 @@ import (
 	"github.com/opoccomaxao/tg-sharegallery/pkg/config"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/endpoints"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/server"
+	"github.com/opoccomaxao/tg-sharegallery/pkg/tg"
 	"go.uber.org/fx"
 )
 
@@ -12,7 +13,9 @@ func Run() error {
 		fx.Provide(NewCancelCause),
 		config.Module(),
 		server.Module(),
+		tg.Module(),
 		endpoints.Invoke(),
+		fx.Invoke(func(*tg.Service) {}),
 	)
 
 	app.Run()

@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/caarlos0/env/v11"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/server"
+	"github.com/opoccomaxao/tg-sharegallery/pkg/tg"
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
 )
@@ -16,7 +17,8 @@ func Module() fx.Option {
 type Config struct {
 	fx.Out
 
-	server.Config `envPrefix:"SERVER_"`
+	Server server.Config `envPrefix:"SERVER_"`
+	TG     tg.Config     `envPrefix:"TG_"`
 }
 
 func New() (Config, error) {

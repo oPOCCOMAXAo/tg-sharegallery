@@ -4,6 +4,7 @@ go 1.23
 
 require (
 	github.com/caarlos0/env/v11 v11.3.1
+	github.com/go-telegram/bot v1.13.3
 	github.com/pkg/errors v0.9.1
 	go.uber.org/fx v1.23.0
 )
