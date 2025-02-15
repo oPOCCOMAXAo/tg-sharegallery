@@ -29,8 +29,11 @@ func NewDefault() *slog.Logger {
 	}))
 }
 
+//nolint:mnd
 func NewDebug() *slog.Logger {
-	return slog.New(devslog.NewHandler(os.Stdout, &devslog.Options{}))
+	return slog.New(devslog.NewHandler(os.Stdout, &devslog.Options{
+		MaxErrorStackTrace: 10,
+	}))
 }
 
 func AsPrintf(slogFunc func(string, ...any)) func(string, ...interface{}) {

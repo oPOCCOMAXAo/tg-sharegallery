@@ -3,6 +3,8 @@ package tg
 import (
 	"log/slog"
 
+	"github.com/go-telegram/bot"
+	"github.com/opoccomaxao/tg-instrumentation/router"
 	"go.uber.org/fx"
 )
 
@@ -24,6 +26,8 @@ type moduleResult struct {
 	fx.Out
 
 	Service *Service
+	Router  *router.Router
+	Client  *bot.Bot
 }
 
 func newModule(
@@ -44,8 +48,10 @@ func newModule(
 
 	params.Lifecycle.Append(fx.Hook{
 		OnStart: res.Service.OnStart,
-		OnStop:  res.Service.OnStop,
 	})
+
+	res.Router = res.Service.Router()
+	res.Client = res.Service.Client()
 
 	return res, nil
 }

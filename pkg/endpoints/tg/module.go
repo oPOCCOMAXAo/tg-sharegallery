@@ -3,7 +3,7 @@ package tg
 import (
 	"net/http"
 
-	"github.com/opoccomaxao/tg-sharegallery/pkg/tg"
+	"github.com/opoccomaxao/tg-instrumentation/router"
 	"go.uber.org/fx"
 )
 
@@ -15,9 +15,9 @@ func Invoke() fx.Option {
 
 func RegisterEndpoints(
 	router *http.ServeMux,
-	service *tg.Service,
+	tgRouter *router.Router,
 ) error {
-	router.HandleFunc("POST /webhook", service.WebhookHandler())
+	router.HandleFunc("POST /webhook", tgRouter.HandlerFunc)
 
 	return nil
 }

@@ -3,14 +3,12 @@ package tg
 import (
 	"context"
 	"log/slog"
-	"net/http"
 
 	"github.com/go-telegram/bot"
-	"github.com/go-telegram/bot/models"
+	"github.com/opoccomaxao/tg-instrumentation/router"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/logger"
 	xmodels "github.com/opoccomaxao/tg-sharegallery/pkg/models"
-	"github.com/opoccomaxao/tg-sharegallery/pkg/texts"
-	"github.com/opoccomaxao/tg-sharegallery/pkg/tg/internal"
+	"github.com/opoccomaxao/tg-sharegallery/pkg/tg/middleware"
 	"github.com/pkg/errors"
 )
 
@@ -18,10 +16,7 @@ type Service struct {
 	config Config
 	logger *slog.Logger
 	client *bot.Bot
-	runCtx context.Context //nolint:containedctx
-	cancel context.CancelFunc
-
-	describer *texts.CommandDescriber
+	router *router.Router
 }
 
 type Config struct {
@@ -39,14 +34,14 @@ func New(
 	res := Service{
 		config: config,
 		logger: logger,
-
-		describer: texts.NewCommandDescriber(),
 	}
 
 	err := res.initClient()
 	if err != nil {
 		return nil, err
 	}
+
+	res.initRouter()
 
 	return &res, nil
 }
@@ -56,7 +51,6 @@ func (s *Service) initClient() error {
 
 	opts := []bot.Option{
 		bot.WithSkipGetMe(),
-		bot.WithDefaultHandler(s.telemetry(internal.HandlerTypeUnknown, "")(s.defaultHandler)),
 		bot.WithDebugHandler(logger.AsPrintf(s.logger.Debug)),
 		bot.WithErrorsHandler(s.ErrorHandler),
 	}
@@ -77,12 +71,33 @@ func (s *Service) initClient() error {
 	return nil
 }
 
+func (s *Service) initRouter() {
+	opts := []router.Option{
+		router.WithClient(s.client),
+	}
+
+	if s.config.Debug {
+		opts = append(opts, router.WithDebug())
+	}
+
+	s.router = router.New(opts...)
+
+	s.router.Use(
+		middleware.Telemetry(s.logger),
+		router.Recover(),
+		router.AutoAccept(),
+	)
+}
+
 func (s *Service) OnStart(ctx context.Context) error {
 	if s.config.NoInit {
 		return nil
 	}
 
-	s.setupCommands(ctx)
+	err := s.router.UpdateCommandsDescription(ctx)
+	if err != nil {
+		return errors.WithStack(err)
+	}
 
 	ok, err := s.client.SetWebhook(ctx, &bot.SetWebhookParams{
 		URL:         s.config.HookURL,
@@ -96,32 +111,17 @@ func (s *Service) OnStart(ctx context.Context) error {
 		return errors.Wrap(xmodels.ErrFailed, "start webhook")
 	}
 
-	s.runCtx, s.cancel = context.WithCancel(context.Background())
-
-	//nolint:contextcheck
-	go s.client.StartWebhook(s.runCtx)
-
 	return nil
-}
-
-func (s *Service) OnStop(context.Context) error {
-	if s.cancel != nil {
-		s.cancel()
-	}
-
-	return nil
-}
-
-func (s *Service) WebhookHandler() http.HandlerFunc {
-	return s.client.WebhookHandler()
 }
 
 func (s *Service) ErrorHandler(err error) {
 	s.logger.Error("tg error", slog.Any("error", err))
 }
 
-func (s *Service) defaultHandler(
-	_ context.Context,
-	_ *bot.Bot,
-	_ *models.Update) {
+func (s *Service) Client() *bot.Bot {
+	return s.client
+}
+
+func (s *Service) Router() *router.Router {
+	return s.router
 }
