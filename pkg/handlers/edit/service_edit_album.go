@@ -16,7 +16,14 @@ func (s *Service) EditAlbum(ctx *router.Context) {
 	query := ctx.Query()
 	query.GetInt64Into("id", &view.AlbumID)
 
-	err := s.fillMenuAlbumView(ctx.Context(), &view)
+	err := s.domain.StartEditAlbum(ctx.Context(), view.UserID, view.AlbumID)
+	if err != nil {
+		ctx.Error(err)
+
+		return
+	}
+
+	err = s.views.FillMenuAlbum(ctx.Context(), &view)
 	if err != nil {
 		ctx.Error(err)
 

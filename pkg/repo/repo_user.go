@@ -48,3 +48,46 @@ func (r *Repo) GetOrCreateUserByTgID(
 
 	return &res, nil
 }
+
+func (r *Repo) RemoveCurrentAlbumFromUserByTgID(
+	ctx context.Context,
+	userTgID int64,
+	albumID int64,
+) error {
+	err := r.db.WithContext(ctx).
+		Model(&models.User{}).
+		Where("tg_id = ?", userTgID).
+		Where("current_album_id = ?", albumID).
+		Select("current_album_id", "updated_at").
+		Updates(&models.User{
+			UpdatedAt:      r.Now().Unix(),
+			CurrentAlbumID: nil,
+		}).
+		Error
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
+}
+
+func (r *Repo) UpdateCurrentAlbumForUserByTgID(
+	ctx context.Context,
+	userTgID int64,
+	albumID int64,
+) error {
+	err := r.db.WithContext(ctx).
+		Model(&models.User{}).
+		Where("tg_id = ?", userTgID).
+		Select("current_album_id", "updated_at").
+		Updates(&models.User{
+			UpdatedAt:      r.Now().Unix(),
+			CurrentAlbumID: &albumID,
+		}).
+		Error
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
+}

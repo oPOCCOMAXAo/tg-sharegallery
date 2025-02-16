@@ -42,7 +42,7 @@ func (s *Service) EditTitleMessage(ctx *router.Context) {
 		return
 	}
 
-	err = s.fillMenuAlbumView(ctx.Context(), &view)
+	err = s.views.FillMenuAlbum(ctx.Context(), &view)
 	if err != nil {
 		ctx.Error(err)
 

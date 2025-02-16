@@ -158,6 +158,29 @@ func (r *Repo) UpdateAlbumTitleByUserTgID(
 	return nil
 }
 
+func (r *Repo) UpdateAlbumSavedByUserTgID(
+	ctx context.Context,
+	albumID int64,
+	userTgID int64,
+) error {
+	err := r.db.WithContext(ctx).
+		Model(&models.Album{}).
+		Select("saved", "updated_at").
+		Where("id = ?", albumID).
+		Where("owner_id IN (SELECT id FROM users WHERE tg_id = ?)", userTgID).
+		Where(`EXISTS (SELECT id FROM album_images WHERE album_id = ?)`, albumID).
+		Updates(&models.Album{
+			Saved:     true,
+			UpdatedAt: r.Now().Unix(),
+		}).
+		Error
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
+}
+
 type FullAlbumsParams struct {
 	AlbumIDs []int64
 	TgUserID int64
@@ -203,4 +226,46 @@ func (r *Repo) GetFullAlbums(
 	}
 
 	return res, nil
+}
+
+type AlbumListParams struct {
+	UserTgID int64
+	Limit    int64
+	Offset   int64
+}
+
+type AlbumListResult struct {
+	AlbumsIDs []int64
+	Total     int64
+}
+
+func (r *Repo) GetAlbumsList(
+	ctx context.Context,
+	params AlbumListParams,
+) (*AlbumListResult, error) {
+	var res AlbumListResult
+
+	query := r.db.WithContext(ctx).
+		Table("albums").
+		Where("owner_id IN (SELECT id FROM users WHERE tg_id = ?)", params.UserTgID)
+
+	err := query.
+		Count(&res.Total).
+		Error
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	err = query.
+		Select("id").
+		Order("id DESC").
+		Limit(int(params.Limit)).
+		Offset(int(params.Offset)).
+		Find(&res.AlbumsIDs).
+		Error
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return &res, nil
 }

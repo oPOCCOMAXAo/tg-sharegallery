@@ -51,7 +51,7 @@ func (m *Menu) ReplyMarkup() models.ReplyMarkup {
 
 	res.InlineKeyboard = append(res.InlineKeyboard, []models.InlineKeyboardButton{
 		{
-			Text:         "Albums >>",
+			Text:         "Albums",
 			CallbackData: "albums",
 		},
 	})

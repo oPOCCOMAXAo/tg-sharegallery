@@ -1,29 +1,22 @@
-package menu
+package albums
 
 import (
 	"github.com/opoccomaxao/tg-instrumentation/router"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/views"
 )
 
-type ViewParams struct {
-	Page      views.MenuPage
-	ChatID    int64
-	MessageID int64
-	QueryID   string
-}
-
-func (s *Service) Menu(ctx *router.Context) {
+func (s *Service) ListAlbums(ctx *router.Context) {
 	update := ctx.Update()
 
-	view := views.Menu{
+	view := views.MenuListAlbums{
 		UserID:    update.CallbackQuery.Message.Message.Chat.ID,
 		MessageID: int64(update.CallbackQuery.Message.Message.ID),
 	}
 
 	query := ctx.Query()
-	query.GetInto("page", (*string)(&view.Page))
+	query.GetInt64Into("page", &view.CurrentPage)
 
-	err := s.views.FillMenu(ctx.Context(), &view)
+	err := s.views.FillMenuListAlbums(ctx.Context(), &view)
 	if err != nil {
 		ctx.Error(err)
 

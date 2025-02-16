@@ -8,7 +8,7 @@ import (
 func (s *Service) Start(ctx *router.Context) {
 	update := ctx.Update()
 
-	_, err := s.domain.GetCreateUserByTgID(ctx.Context(), update.Message.From.ID)
+	_, err := s.domain.GetOrCreateUserByTgID(ctx.Context(), update.Message.From.ID)
 	if err != nil {
 		ctx.Error(err)
 
@@ -21,7 +21,7 @@ func (s *Service) Start(ctx *router.Context) {
 		Page:      views.MenuPageMain,
 	}
 
-	err = s.fillMenuView(ctx, &view)
+	err = s.views.FillMenu(ctx.Context(), &view)
 	if err != nil {
 		ctx.Error(err)
 

@@ -14,7 +14,19 @@ func (s *Service) NewAlbumMessage(ctx *router.Context) {
 		AlbumID:   0,
 	}
 
-	err := s.fillMenuAlbumView(ctx.Context(), &view)
+	album, err := s.domain.StartEditNewAlbumForUserByTgID(
+		ctx.Context(),
+		view.UserID,
+	)
+	if err != nil {
+		ctx.Error(err)
+
+		return
+	}
+
+	view.AlbumID = album.ID
+
+	err = s.views.FillMenuAlbum(ctx.Context(), &view)
 	if err != nil {
 		ctx.Error(err)
 
@@ -33,7 +45,19 @@ func (s *Service) NewAlbum(ctx *router.Context) {
 		AlbumID:   0,
 	}
 
-	err := s.fillMenuAlbumView(ctx.Context(), &view)
+	album, err := s.domain.StartEditNewAlbumForUserByTgID(
+		ctx.Context(),
+		view.UserID,
+	)
+	if err != nil {
+		ctx.Error(err)
+
+		return
+	}
+
+	view.AlbumID = album.ID
+
+	err = s.views.FillMenuAlbum(ctx.Context(), &view)
 	if err != nil {
 		ctx.Error(err)
 

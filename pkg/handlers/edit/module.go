@@ -38,6 +38,12 @@ func RegisterHandlers(
 		service.EditAlbum,
 	)
 
+	router.Callback("save_album",
+		pkgrouter.AutoAnswerCallbackQuery(),
+		middleware.RequiredCallbackMessage,
+		service.SaveAlbum,
+	)
+
 	router.Custom(service.editTitleMatcher, service.EditTitleMessage)
 
 	router.Custom(service.attachImageMatcher, service.AttachImageMessage)

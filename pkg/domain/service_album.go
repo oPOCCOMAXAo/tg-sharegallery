@@ -7,6 +7,7 @@ import (
 	"github.com/opoccomaxao/tg-sharegallery/pkg/models"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/repo"
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 )
 
 type UserAlbumStats struct {
@@ -47,10 +48,10 @@ func (s *Service) GetUserAlbumStats(
 	return &res, nil
 }
 
-func (s *Service) GetOrCreateNewAlbumForUserByTgID(
+func (s *Service) StartEditNewAlbumForUserByTgID(
 	ctx context.Context,
 	userTgID int64,
-) (*models.AlbumDomain, error) {
+) (*models.Album, error) {
 	user, err := s.repo.GetOrCreateUserByTgID(ctx, userTgID)
 	if err != nil {
 		//nolint:wrapcheck
@@ -73,25 +74,16 @@ func (s *Service) GetOrCreateNewAlbumForUserByTgID(
 		}
 	}
 
-	domain, err := s.repo.GetFullAlbums(ctx, repo.FullAlbumsParams{
-		AlbumIDs: []int64{album.ID},
-		TgUserID: userTgID,
-	})
+	err = s.repo.UpdateCurrentAlbumForUserByTgID(ctx, userTgID, album.ID)
 	if err != nil {
 		//nolint:wrapcheck
 		return nil, err
 	}
 
-	for _, ad := range domain {
-		if ad.ID == album.ID {
-			return ad, nil
-		}
-	}
-
-	return nil, errors.WithStack(models.ErrFailed)
+	return album, nil
 }
 
-func (s *Service) GetAlbumForUser(
+func (s *Service) GetAlbumForUserByTgID(
 	ctx context.Context,
 	userTgID int64,
 	albumID int64,
@@ -112,4 +104,71 @@ func (s *Service) GetAlbumForUser(
 	}
 
 	return nil, errors.WithStack(models.ErrNotFound)
+}
+
+func (s *Service) GetCurrentAlbumForUserByTgID(
+	ctx context.Context,
+	userTgID int64,
+) (*models.AlbumDomain, error) {
+	albumID, err := s.repo.GetUserCurrentAlbumID(ctx, userTgID)
+	if err != nil {
+		//nolint:wrapcheck
+		return nil, err
+	}
+
+	if albumID == 0 {
+		return nil, errors.WithStack(models.ErrNotFound)
+	}
+
+	return s.GetAlbumForUserByTgID(ctx, userTgID, albumID)
+}
+
+type ListAlbumsParams struct {
+	UserTgID int64
+	Limit    int64
+	Offset   int64
+}
+
+type ListAlbumsResult struct {
+	Albums []*models.AlbumDomain
+	Total  int64
+}
+
+func (s *Service) ListAlbums(
+	ctx context.Context,
+	params ListAlbumsParams,
+) (*ListAlbumsResult, error) {
+	var res ListAlbumsResult
+
+	list, err := s.repo.GetAlbumsList(ctx, repo.AlbumListParams{
+		UserTgID: params.UserTgID,
+		Limit:    params.Limit,
+		Offset:   params.Offset,
+	})
+	if err != nil {
+		//nolint:wrapcheck
+		return nil, err
+	}
+
+	albums, err := s.repo.GetFullAlbums(ctx, repo.FullAlbumsParams{
+		AlbumIDs: list.AlbumsIDs,
+	})
+	if err != nil {
+		//nolint:wrapcheck
+		return nil, err
+	}
+
+	byID := lo.KeyBy(albums, func(a *models.AlbumDomain) int64 {
+		return a.ID
+	})
+
+	res.Albums = lo.FilterMap(list.AlbumsIDs, func(id int64, _ int) (*models.AlbumDomain, bool) {
+		album, ok := byID[id]
+
+		return album, ok
+	})
+
+	res.Total = list.Total
+
+	return &res, nil
 }

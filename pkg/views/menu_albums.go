@@ -5,6 +5,8 @@ import (
 
 	"github.com/go-telegram/bot"
 	bmodels "github.com/go-telegram/bot/models"
+	"github.com/opoccomaxao/tg-instrumentation/query"
+	"github.com/samber/lo"
 )
 
 type MenuAlbums struct {
@@ -34,20 +36,20 @@ func (m *MenuAlbums) Text() string {
 func (m *MenuAlbums) ReplyMarkup() bmodels.ReplyMarkup {
 	var res bmodels.InlineKeyboardMarkup
 
-	if !m.HasUnsaved {
-		res.InlineKeyboard = append(res.InlineKeyboard, []bmodels.InlineKeyboardButton{
-			{
-				Text:         "Create new album",
-				CallbackData: "new_album",
-			},
-		})
-	}
+	res.InlineKeyboard = append(res.InlineKeyboard, []bmodels.InlineKeyboardButton{
+		{
+			Text:         lo.Ternary(m.HasUnsaved, "View unsaved album", "Create new album"),
+			CallbackData: "new_album",
+		},
+	})
 
-	if m.EditAlbumID != 0 || m.HasUnsaved {
+	if m.EditAlbumID != 0 {
 		res.InlineKeyboard = append(res.InlineKeyboard, []bmodels.InlineKeyboardButton{
 			{
-				Text:         "View album under editing",
-				CallbackData: "edit_album",
+				Text: "View opened album",
+				CallbackData: query.Command("edit_album").
+					WithParamInt64("id", m.EditAlbumID).
+					Encode(),
 			},
 		})
 	}

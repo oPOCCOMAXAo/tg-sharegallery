@@ -14,7 +14,7 @@ func (s *Service) Help(ctx *router.Context) {
 		Page:      views.MenuPageHelp,
 	}
 
-	err := s.fillMenuView(ctx, &view)
+	err := s.views.FillMenu(ctx.Context(), &view)
 	if err != nil {
 		ctx.Error(err)
 

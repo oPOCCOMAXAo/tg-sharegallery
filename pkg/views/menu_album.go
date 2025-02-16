@@ -33,6 +33,8 @@ func (m *MenuAlbum) Text() string {
 			"<b>Public link</b>: "+lo.CoalesceOrEmpty(m.Album.PublicLink, "not published. Use [Publish] button from the menu."),
 			"\nUpload images to this album by sending them to this chat.",
 			"\nSend text message to this chat to set the title of the album.",
+			"\nOnce you have uploaded images, you can save the album and exit.",
+			"\nYou can also publish the album to get a public link.",
 		)
 	}
 
@@ -54,14 +56,16 @@ func (m *MenuAlbum) ReplyMarkup() bmodels.ReplyMarkup {
 	if m.Album != nil {
 		row := []bmodels.InlineKeyboardButton{}
 
+		canSave := m.Album.Saved || m.Album.ImagesCount > 0
+
 		row = append(row, bmodels.InlineKeyboardButton{
-			Text: "Save and exit",
+			Text: lo.Ternary(canSave, "Save and exit", "Exit"),
 			CallbackData: query.Command("save_album").
 				WithParamInt64("id", m.Album.ID).
 				Encode(),
 		})
 
-		if m.Album.PublicLink == "" {
+		if m.Album.PublicLink == "" && canSave {
 			row = append(row, bmodels.InlineKeyboardButton{
 				Text: "Publish",
 				CallbackData: query.Command("publish_album").

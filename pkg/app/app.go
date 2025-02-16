@@ -10,6 +10,7 @@ import (
 	"github.com/opoccomaxao/tg-sharegallery/pkg/repo"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/server"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/tg"
+	"github.com/opoccomaxao/tg-sharegallery/pkg/views"
 	"go.uber.org/fx"
 )
 
@@ -24,6 +25,7 @@ func Run() error {
 		db.Module(),
 		repo.Module(),
 		domain.Module(),
+		views.Module(),
 		endpoints.Invoke(),
 		handlers.Invoke(),
 	)

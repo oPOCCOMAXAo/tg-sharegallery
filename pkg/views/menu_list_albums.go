@@ -9,13 +9,15 @@ import (
 	"github.com/opoccomaxao/tg-sharegallery/pkg/models"
 )
 
+const AlbumsPerPage = 10
+
 type MenuListAlbums struct {
 	UserID      int64
 	MessageID   int64
-	Albums      []*models.Album
 	CurrentPage int64
 	HasNextPage bool
 	HasPrevPage bool
+	Albums      []*models.AlbumDomain
 }
 
 func (m *MenuListAlbums) Text() string {
@@ -62,7 +64,7 @@ func (m *MenuListAlbums) ReplyMarkup() bmodels.ReplyMarkup {
 
 	res.InlineKeyboard = append(res.InlineKeyboard, []bmodels.InlineKeyboardButton{
 		{
-			Text: "<< Back",
+			Text: "Menu",
 			CallbackData: query.Command("albums").
 				Encode(),
 		},

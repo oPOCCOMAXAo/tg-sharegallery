@@ -21,7 +21,7 @@ func RegisterHandlers(
 	router.
 		Text("/albums",
 			middleware.RequiredPrivateChat,
-			service.Albums,
+			service.AlbumsMessage,
 		).
 		WithDescription(apimodels.LCAll, apimodels.CSAllPrivateChats, "View my albums").
 		WithDescription(apimodels.LCUk, apimodels.CSAllPrivateChats, "Переглянути мої альбоми")
@@ -29,7 +29,13 @@ func RegisterHandlers(
 	router.Callback("albums",
 		pkgrouter.AutoAnswerCallbackQuery(),
 		middleware.RequiredCallbackMessage,
-		service.MenuAlbums,
+		service.Albums,
+	)
+
+	router.Callback("list_albums",
+		pkgrouter.AutoAnswerCallbackQuery(),
+		middleware.RequiredCallbackMessage,
+		service.ListAlbums,
 	)
 
 	return nil
