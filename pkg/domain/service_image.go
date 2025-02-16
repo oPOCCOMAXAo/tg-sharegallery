@@ -41,3 +41,27 @@ func (s *Service) GetImagePage(
 
 	return &res, nil
 }
+
+func (s *Service) GetPublicImagePage(
+	ctx context.Context,
+	params ImagePageParams,
+) (*ImagePageResult, error) {
+	var (
+		res ImagePageResult
+		err error
+	)
+
+	res.Image, err = s.repo.GetImagePage(ctx, params.AlbumID, params.Offset)
+	if err != nil {
+		//nolint:wrapcheck
+		return nil, err
+	}
+
+	res.Total, err = s.repo.GetAlbumImagesCount(ctx, params.AlbumID)
+	if err != nil {
+		//nolint:wrapcheck
+		return nil, err
+	}
+
+	return &res, nil
+}

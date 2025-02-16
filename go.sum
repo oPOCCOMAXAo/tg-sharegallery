@@ -12,6 +12,8 @@ github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.1.5 h1:/o9tlHleP7gOFmsnYNz3RGnqzefHA47wQpKrrdTIwXQ=
 github.com/jinzhu/now v1.1.5/go.mod h1:d3SSVoowX0Lcu0IBviAWJpolVfI5UJVZZ7cO71lE/z8=
+github.com/opoccomaxao/go-snowflake v0.0.0-20250216194043-c788a0d36a8c h1:eHr5GRh2n49rgKCMLSxEKxMxLF/MZkfWrywl9oTetgs=
+github.com/opoccomaxao/go-snowflake v0.0.0-20250216194043-c788a0d36a8c/go.mod h1:eszHXCI/Z3eq0I6otFu1S5BVj4rmoapP/KST4+zSSgU=
 github.com/opoccomaxao/tg-instrumentation v0.0.0-20250216190033-f96641a31b99 h1:sumPf4hpLJMIuvcq612SEu8XUoEWvsa2tOPzCVc6DSY=
 github.com/opoccomaxao/tg-instrumentation v0.0.0-20250216190033-f96641a31b99/go.mod h1:WGXXBJd6WFTdLubFbsIYgmO3sZqsnnvG8+sI1+Zg/mw=
 github.com/orandin/slog-gorm v1.4.0 h1:FgA8hJufF9/jeNSYoEXmHPPBwET2gwlF3B85JdpsTUU=

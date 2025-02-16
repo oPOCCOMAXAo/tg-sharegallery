@@ -4,11 +4,45 @@ import (
 	"context"
 	"time"
 
+	"github.com/opoccomaxao/tg-instrumentation/query"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/models"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/repo"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 )
+
+func (s *Service) GetFullAlbums(
+	ctx context.Context,
+	params repo.FullAlbumsParams,
+) ([]*models.AlbumDomain, error) {
+	albums, err := s.repo.GetFullAlbums(ctx, params)
+	if err != nil {
+		//nolint:wrapcheck
+		return nil, err
+	}
+
+	for _, album := range albums {
+		if album.PublicID != nil {
+			album.PublicLink, err = s.tg.CreateStartLink(query.Command("id").
+				WithParamInt64("id", *album.PublicID).
+				Encode())
+			if err != nil {
+				//nolint:wrapcheck
+				return nil, err
+			}
+		}
+	}
+
+	return albums, nil
+}
+
+func (s *Service) GetAlbumByID(
+	ctx context.Context,
+	albumID int64,
+) (*models.Album, error) {
+	//nolint:wrapcheck
+	return s.repo.GetAlbumByID(ctx, albumID)
+}
 
 type UserAlbumStats struct {
 	AlbumsCount    int64
@@ -92,12 +126,11 @@ func (s *Service) GetAlbumForUserByTgID(
 	ctx context.Context,
 	params GetAlbumParams,
 ) (*models.AlbumDomain, error) {
-	res, err := s.repo.GetFullAlbums(ctx, repo.FullAlbumsParams{
+	res, err := s.GetFullAlbums(ctx, repo.FullAlbumsParams{
 		AlbumIDs: []int64{params.AlbumID},
 		UserTgID: params.UserTgID,
 	})
 	if err != nil {
-		//nolint:wrapcheck
 		return nil, err
 	}
 
@@ -157,11 +190,10 @@ func (s *Service) ListAlbums(
 		return nil, err
 	}
 
-	albums, err := s.repo.GetFullAlbums(ctx, repo.FullAlbumsParams{
+	albums, err := s.GetFullAlbums(ctx, repo.FullAlbumsParams{
 		AlbumIDs: list.AlbumsIDs,
 	})
 	if err != nil {
-		//nolint:wrapcheck
 		return nil, err
 	}
 
@@ -178,4 +210,21 @@ func (s *Service) ListAlbums(
 	res.Total = list.Total
 
 	return &res, nil
+}
+
+func (s *Service) GetAlbumIDByPublicID(
+	ctx context.Context,
+	publicID int64,
+) (int64, error) {
+	albumID, err := s.repo.GetAlbumIDByPublicIDOrZero(ctx, publicID)
+	if err != nil {
+		//nolint:wrapcheck
+		return 0, err
+	}
+
+	if albumID == 0 {
+		return 0, errors.WithStack(models.ErrNotFound)
+	}
+
+	return albumID, nil
 }

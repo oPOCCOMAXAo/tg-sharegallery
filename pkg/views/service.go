@@ -119,3 +119,31 @@ func (s *Service) FillPreview(
 
 	return nil
 }
+
+func (s *Service) FillPublicView(
+	ctx context.Context,
+	view *PublicView,
+) error {
+	var err error
+
+	view.Album, err = s.domain.GetAlbumByID(ctx, view.AlbumID)
+	if err != nil {
+		//nolint:wrapcheck
+		return err
+	}
+
+	page, err := s.domain.GetPublicImagePage(ctx, domain.ImagePageParams{
+		AlbumID: view.AlbumID,
+		Offset:  view.CurrentPage,
+	})
+	if err != nil {
+		//nolint:wrapcheck
+		return err
+	}
+
+	view.Image = page.Image
+	view.HasPrevPage = view.CurrentPage > 0
+	view.HasNextPage = page.Total > view.CurrentPage+1
+
+	return nil
+}

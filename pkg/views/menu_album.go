@@ -30,7 +30,20 @@ func (m *MenuAlbum) Text() string {
 			"Album",
 			"<b>Title</b>:\n"+m.Album.Title,
 			"<b>Images</b>: "+strconv.FormatInt(m.Album.ImagesCount, 10),
-			"<b>Public link</b>: "+lo.CoalesceOrEmpty(m.Album.PublicLink, "not published. Use [Publish] button from the menu."),
+		)
+
+		if m.Album.PublicLink != "" {
+			lines = append(lines,
+				"<b>Public link</b>: "+m.Album.PublicLink,
+				"<b>Click to copy</b>: <code>"+m.Album.PublicLink+"</code>",
+			)
+		} else {
+			lines = append(lines,
+				"<b>Public link</b>: not published. Use [Publish] button from the menu.",
+			)
+		}
+
+		lines = append(lines,
 			"\nUpload images to this album by sending them to this chat.",
 			"\nSend text message to this chat to set the title of the album.",
 			"\nOnce you have uploaded images, you can save the album and exit.",

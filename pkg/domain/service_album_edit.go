@@ -64,3 +64,26 @@ func (s *Service) SaveAlbum(
 
 	return nil
 }
+
+type PublishAlbumParams struct {
+	UserTgID int64
+	AlbumID  int64
+}
+
+func (s *Service) PublishAlbum(
+	ctx context.Context,
+	params PublishAlbumParams,
+) error {
+	err := s.repo.UpdateAlbumPublicIDByUserTgID(
+		ctx,
+		params.AlbumID,
+		params.UserTgID,
+		int64(s.snowflake.Next()), //nolint:gosec
+	)
+	if err != nil {
+		//nolint:wrapcheck
+		return err
+	}
+
+	return nil
+}

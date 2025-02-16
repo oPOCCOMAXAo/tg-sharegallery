@@ -31,8 +31,7 @@ func RegisterHandlers(
 			middleware.RequiredPrivateChat,
 			service.Help,
 		).
-		WithDescription(apimodels.LCEn, apimodels.CSAllPrivateChats, "Help").
-		WithDescription(apimodels.LCUk, apimodels.CSAllPrivateChats, "Допомога")
+		WithDescription(apimodels.LCEn, apimodels.CSAllPrivateChats, "Help")
 
 	router.Callback("menu",
 		pkgrouter.AutoAnswerCallbackQuery(),

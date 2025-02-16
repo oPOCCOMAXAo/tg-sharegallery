@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/go-telegram/bot"
+	"github.com/go-telegram/bot/models"
 	"github.com/opoccomaxao/tg-instrumentation/router"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/logger"
 	xmodels "github.com/opoccomaxao/tg-sharegallery/pkg/models"
@@ -17,6 +18,7 @@ type Service struct {
 	logger *slog.Logger
 	client *bot.Bot
 	router *router.Router
+	me     *models.User
 }
 
 type Config struct {
@@ -110,6 +112,11 @@ func (s *Service) OnStart(ctx context.Context) error {
 
 	if !ok {
 		return errors.Wrap(xmodels.ErrFailed, "start webhook")
+	}
+
+	s.me, err = s.client.GetMe(ctx)
+	if err != nil {
+		return errors.WithStack(err)
 	}
 
 	return nil

@@ -9,6 +9,24 @@ import (
 	"gorm.io/gorm"
 )
 
+func (r *Repo) GetAlbumByID(
+	ctx context.Context,
+	albumID int64,
+) (*models.Album, error) {
+	var res models.Album
+
+	err := r.db.WithContext(ctx).
+		Model(&models.Album{}).
+		Where("id = ?", albumID).
+		Take(&res).
+		Error
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return &res, nil
+}
+
 type AlbumStats struct {
 	UserID int64 `gorm:"column:user_id"`
 	Count  int64 `gorm:"column:count"`
@@ -181,6 +199,30 @@ func (r *Repo) UpdateAlbumSavedByUserTgID(
 	return nil
 }
 
+func (r *Repo) UpdateAlbumPublicIDByUserTgID(
+	ctx context.Context,
+	albumID int64,
+	userTgID int64,
+	publicID int64,
+) error {
+	err := r.db.WithContext(ctx).
+		Model(&models.Album{}).
+		Select("public_id", "updated_at").
+		Where("id = ?", albumID).
+		Where("owner_id IN (SELECT id FROM users WHERE tg_id = ?)", userTgID).
+		Where("public_id IS NULL").
+		Updates(&models.Album{
+			PublicID:  &publicID,
+			UpdatedAt: r.Now().Unix(),
+		}).
+		Error
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
+}
+
 type FullAlbumsParams struct {
 	AlbumIDs []int64
 	UserTgID int64
@@ -268,4 +310,41 @@ func (r *Repo) GetAlbumsList(
 	}
 
 	return &res, nil
+}
+
+func (r *Repo) GetAlbumIDByPublicIDOrZero(
+	ctx context.Context,
+	publicID int64,
+) (int64, error) {
+	var res models.Album
+
+	err := r.db.WithContext(ctx).
+		Table("albums").
+		Select("id").
+		Where("public_id = ?", publicID).
+		Take(&res).
+		Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return 0, errors.WithStack(err)
+	}
+
+	return res.ID, nil
+}
+
+func (r *Repo) GetAlbumImagesCount(
+	ctx context.Context,
+	albumID int64,
+) (int64, error) {
+	var res int64
+
+	err := r.db.WithContext(ctx).
+		Model(&models.AlbumImage{}).
+		Where("album_id = ?", albumID).
+		Count(&res).
+		Error
+	if err != nil {
+		return 0, errors.WithStack(err)
+	}
+
+	return res, nil
 }

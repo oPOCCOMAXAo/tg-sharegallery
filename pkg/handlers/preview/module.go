@@ -23,5 +23,11 @@ func RegisterHandlers(
 		service.PreviewAlbum,
 	)
 
+	router.Callback("view_album",
+		pkgrouter.AutoAnswerCallbackQuery(),
+		middleware.RequiredCallbackMessage,
+		service.ViewAlbum,
+	)
+
 	return nil
 }

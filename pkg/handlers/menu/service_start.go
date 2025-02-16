@@ -15,6 +15,34 @@ func (s *Service) Start(ctx *router.Context) {
 		return
 	}
 
+	query := ctx.Query()
+	if query.Has("id") {
+		view := views.PublicView{
+			UserID:    update.Message.From.ID,
+			MessageID: int64(update.Message.ID),
+		}
+
+		query.GetInt64Into("id", &view.AlbumID)
+
+		view.AlbumID, err = s.domain.GetAlbumIDByPublicID(ctx.Context(), view.AlbumID)
+		if err != nil {
+			ctx.Error(err)
+
+			return
+		}
+
+		err = s.views.FillPublicView(ctx.Context(), &view)
+		if err != nil {
+			ctx.Error(err)
+
+			return
+		}
+
+		ctx.LogError2(ctx.SendPhoto(view.SendPhotoParams()))
+
+		return
+	}
+
 	view := views.Menu{
 		UserID:    update.Message.From.ID,
 		MessageID: int64(update.Message.ID),
