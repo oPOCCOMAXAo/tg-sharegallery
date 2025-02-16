@@ -1,26 +1,25 @@
 package menu
 
 import (
-	"log/slog"
-
+	"github.com/go-telegram/bot"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/domain"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/views"
 )
 
 type Service struct {
-	logger *slog.Logger
 	domain *domain.Service
 	views  *views.Service
+	client *bot.Bot
 }
 
 func NewService(
-	logger *slog.Logger,
 	domain *domain.Service,
 	views *views.Service,
+	client *bot.Bot,
 ) *Service {
 	return &Service{
-		logger: logger,
 		domain: domain,
 		views:  views,
+		client: client,
 	}
 }

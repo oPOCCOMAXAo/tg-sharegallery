@@ -7,7 +7,7 @@ import (
 	"go.uber.org/fx"
 )
 
-func Module() fx.Option {
+func Invoke() fx.Option {
 	return fx.Module("handlers/menu",
 		fx.Provide(fx.Private, NewService),
 		fx.Invoke(RegisterHandlers),
@@ -38,6 +38,12 @@ func RegisterHandlers(
 		pkgrouter.AutoAnswerCallbackQuery(),
 		middleware.RequiredCallbackMessage,
 		service.Menu,
+	)
+
+	router.Callback("delete",
+		pkgrouter.AutoAnswerCallbackQuery(),
+		middleware.RequiredCallbackMessage,
+		service.Delete,
 	)
 
 	return nil

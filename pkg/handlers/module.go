@@ -7,14 +7,16 @@ import (
 	"github.com/opoccomaxao/tg-sharegallery/pkg/handlers/albums"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/handlers/edit"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/handlers/menu"
+	"github.com/opoccomaxao/tg-sharegallery/pkg/handlers/preview"
 	"go.uber.org/fx"
 )
 
 func Invoke() fx.Option {
 	return fx.Module("handlers",
-		menu.Module(),
-		albums.Module(),
-		edit.Module(),
+		menu.Invoke(),
+		albums.Invoke(),
+		edit.Invoke(),
+		preview.Invoke(),
 		fx.Invoke(FinishHandlers),
 	)
 }

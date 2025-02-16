@@ -61,7 +61,10 @@ func (s *Service) FillMenuAlbum(
 			return err
 		}
 	} else {
-		view.Album, err = s.domain.GetAlbumForUserByTgID(ctx, view.UserID, view.AlbumID)
+		view.Album, err = s.domain.GetAlbumForUserByTgID(ctx, domain.GetAlbumParams{
+			UserTgID: view.UserID,
+			AlbumID:  view.AlbumID,
+		})
 		if err != nil && !errors.Is(err, models.ErrNotFound) {
 			//nolint:wrapcheck
 			return err
@@ -92,6 +95,27 @@ func (s *Service) FillMenuListAlbums(
 	view.Albums = list.Albums
 	view.HasPrevPage = view.CurrentPage > 1
 	view.HasNextPage = list.Total > (view.CurrentPage+1)*AlbumsPerPage
+
+	return nil
+}
+
+func (s *Service) FillPreview(
+	ctx context.Context,
+	view *Preview,
+) error {
+	page, err := s.domain.GetImagePage(ctx, domain.ImagePageParams{
+		AlbumID:  view.AlbumID,
+		UserTgID: view.UserID,
+		Offset:   view.CurrentPage,
+	})
+	if err != nil {
+		//nolint:wrapcheck
+		return err
+	}
+
+	view.Image = page.Image
+	view.HasPrevPage = view.CurrentPage > 0
+	view.HasNextPage = page.Total > view.CurrentPage+1
 
 	return nil
 }

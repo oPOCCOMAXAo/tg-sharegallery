@@ -2,6 +2,7 @@ package edit
 
 import (
 	"github.com/opoccomaxao/tg-instrumentation/router"
+	"github.com/opoccomaxao/tg-sharegallery/pkg/domain"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/views"
 )
 
@@ -16,7 +17,10 @@ func (s *Service) EditAlbum(ctx *router.Context) {
 	query := ctx.Query()
 	query.GetInt64Into("id", &view.AlbumID)
 
-	err := s.domain.StartEditAlbum(ctx.Context(), view.UserID, view.AlbumID)
+	err := s.domain.StartEditAlbum(ctx.Context(), domain.StartEditAlbumParams{
+		UserTgID: view.UserID,
+		AlbumID:  view.AlbumID,
+	})
 	if err != nil {
 		ctx.Error(err)
 

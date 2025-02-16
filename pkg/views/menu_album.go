@@ -79,6 +79,7 @@ func (m *MenuAlbum) ReplyMarkup() bmodels.ReplyMarkup {
 				Text: "Preview",
 				CallbackData: query.Command("preview_album").
 					WithParamInt64("id", m.Album.ID).
+					WithParamEmpty("new").
 					Encode(),
 			})
 		}

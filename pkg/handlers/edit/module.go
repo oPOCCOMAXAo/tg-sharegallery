@@ -7,7 +7,7 @@ import (
 	"go.uber.org/fx"
 )
 
-func Module() fx.Option {
+func Invoke() fx.Option {
 	return fx.Module("handlers/edit",
 		fx.Provide(fx.Private, NewService),
 		fx.Invoke(RegisterHandlers),

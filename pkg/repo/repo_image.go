@@ -51,3 +51,29 @@ func (r *Repo) CreateAlbumImageByUserTgID(
 
 	return nil
 }
+
+func (r *Repo) GetImagePage(
+	ctx context.Context,
+	albumID int64,
+	offset int64,
+) (*models.AlbumImage, error) {
+	var image models.AlbumImage
+
+	err := r.db.WithContext(ctx).
+		Model(&models.AlbumImage{}).
+		Where("album_id = ?", albumID).
+		Order("id ASC").
+		Offset(int(offset)).
+		Limit(1).
+		Take(&image).
+		Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.WithStack(models.ErrNotFound)
+		}
+
+		return nil, errors.WithStack(err)
+	}
+
+	return &image, nil
+}

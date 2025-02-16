@@ -22,17 +22,21 @@ func (s *Service) AttachImageToAlbumByUserTgID(
 	return s.repo.CreateAlbumImageByUserTgID(ctx, userTgID, imageFileID)
 }
 
+type StartEditAlbumParams struct {
+	UserTgID int64
+	AlbumID  int64
+}
+
 func (s *Service) StartEditAlbum(
 	ctx context.Context,
-	userTgID int64,
-	albumID int64,
+	params StartEditAlbumParams,
 ) error {
-	_, err := s.GetAlbumForUserByTgID(ctx, userTgID, albumID)
+	_, err := s.GetAlbumForUserByTgID(ctx, GetAlbumParams(params))
 	if err != nil {
 		return err
 	}
 
-	err = s.repo.UpdateCurrentAlbumForUserByTgID(ctx, userTgID, albumID)
+	err = s.repo.UpdateCurrentAlbumForUserByTgID(ctx, params.UserTgID, params.AlbumID)
 	if err != nil {
 		//nolint:wrapcheck
 		return err

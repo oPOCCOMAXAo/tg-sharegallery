@@ -183,7 +183,7 @@ func (r *Repo) UpdateAlbumSavedByUserTgID(
 
 type FullAlbumsParams struct {
 	AlbumIDs []int64
-	TgUserID int64
+	UserTgID int64
 }
 
 func (r *Repo) GetFullAlbums(
@@ -213,9 +213,9 @@ func (r *Repo) GetFullAlbums(
 		Group("a.id").
 		Where("a.id IN (?)", params.AlbumIDs)
 
-	if params.TgUserID != 0 {
+	if params.UserTgID != 0 {
 		query = query.
-			Where("a.owner_id IN (SELECT id FROM users WHERE tg_id = ?)", params.TgUserID)
+			Where("a.owner_id IN (SELECT id FROM users WHERE tg_id = ?)", params.UserTgID)
 	}
 
 	err := query.

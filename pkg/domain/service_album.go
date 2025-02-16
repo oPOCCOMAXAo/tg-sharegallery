@@ -83,14 +83,18 @@ func (s *Service) StartEditNewAlbumForUserByTgID(
 	return album, nil
 }
 
+type GetAlbumParams struct {
+	UserTgID int64
+	AlbumID  int64
+}
+
 func (s *Service) GetAlbumForUserByTgID(
 	ctx context.Context,
-	userTgID int64,
-	albumID int64,
+	params GetAlbumParams,
 ) (*models.AlbumDomain, error) {
 	res, err := s.repo.GetFullAlbums(ctx, repo.FullAlbumsParams{
-		AlbumIDs: []int64{albumID},
-		TgUserID: userTgID,
+		AlbumIDs: []int64{params.AlbumID},
+		UserTgID: params.UserTgID,
 	})
 	if err != nil {
 		//nolint:wrapcheck
@@ -98,7 +102,7 @@ func (s *Service) GetAlbumForUserByTgID(
 	}
 
 	for _, ad := range res {
-		if ad.ID == albumID {
+		if ad.ID == params.AlbumID {
 			return ad, nil
 		}
 	}
@@ -120,7 +124,10 @@ func (s *Service) GetCurrentAlbumForUserByTgID(
 		return nil, errors.WithStack(models.ErrNotFound)
 	}
 
-	return s.GetAlbumForUserByTgID(ctx, userTgID, albumID)
+	return s.GetAlbumForUserByTgID(ctx, GetAlbumParams{
+		UserTgID: userTgID,
+		AlbumID:  albumID,
+	})
 }
 
 type ListAlbumsParams struct {
