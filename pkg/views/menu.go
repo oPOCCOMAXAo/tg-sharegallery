@@ -15,7 +15,7 @@ const (
 
 type Menu struct {
 	Page      MenuPage
-	ChatID    int64
+	UserID    int64
 	MessageID int64
 }
 
@@ -65,7 +65,7 @@ func (m *Menu) ReplyMarkup() models.ReplyMarkup {
 
 func (m *Menu) SendMessageParams() *bot.SendMessageParams {
 	return &bot.SendMessageParams{
-		ChatID:      m.ChatID,
+		ChatID:      m.UserID,
 		Text:        m.Text(),
 		ParseMode:   models.ParseModeHTML,
 		ReplyMarkup: m.ReplyMarkup(),
@@ -74,7 +74,7 @@ func (m *Menu) SendMessageParams() *bot.SendMessageParams {
 
 func (m *Menu) EditMessageTextParams() *bot.EditMessageTextParams {
 	return &bot.EditMessageTextParams{
-		ChatID:      m.ChatID,
+		ChatID:      m.UserID,
 		MessageID:   int(m.MessageID),
 		Text:        m.Text(),
 		ParseMode:   models.ParseModeHTML,

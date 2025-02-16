@@ -86,6 +86,7 @@ func (s *Service) initRouter() {
 		middleware.Telemetry(s.logger),
 		router.Recover(),
 		router.AutoAccept(),
+		router.AutoAnswerCallbackQuery(),
 	)
 }
 

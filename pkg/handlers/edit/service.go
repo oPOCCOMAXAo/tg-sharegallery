@@ -1,4 +1,4 @@
-package albumedit
+package edit
 
 import (
 	"log/slog"

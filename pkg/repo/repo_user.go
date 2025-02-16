@@ -42,6 +42,7 @@ func (r *Repo) GetOrCreateUserByTgID(
 			return nil
 		})
 	if err != nil {
+		//nolint:wrapcheck
 		return nil, err
 	}
 

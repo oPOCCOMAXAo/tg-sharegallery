@@ -16,12 +16,12 @@ func (s *Service) Start(ctx *router.Context) {
 	}
 
 	view := views.Menu{
-		ChatID:    update.Message.Chat.ID,
+		UserID:    update.Message.From.ID,
 		MessageID: int64(update.Message.ID),
 		Page:      views.MenuPageMain,
 	}
 
-	err = s.fillMenuView(ctx.Context(), &view)
+	err = s.fillMenuView(ctx, &view)
 	if err != nil {
 		ctx.Error(err)
 

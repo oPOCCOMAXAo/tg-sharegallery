@@ -2,7 +2,7 @@ package models
 
 import "errors"
 
-// global errors.
 var (
-	ErrFailed = errors.New("failed")
+	ErrFailed   = errors.New("failed")
+	ErrNotFound = errors.New("not found")
 )

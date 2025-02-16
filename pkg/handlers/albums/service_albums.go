@@ -1,20 +1,19 @@
-package menu
+package albums
 
 import (
 	"github.com/opoccomaxao/tg-instrumentation/router"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/views"
 )
 
-func (s *Service) Help(ctx *router.Context) {
+func (s *Service) Albums(ctx *router.Context) {
 	update := ctx.Update()
 
-	view := views.Menu{
+	view := views.MenuAlbums{
 		UserID:    update.Message.Chat.ID,
 		MessageID: int64(update.Message.ID),
-		Page:      views.MenuPageHelp,
 	}
 
-	err := s.fillMenuView(ctx, &view)
+	err := s.fillMenuAlbumsView(ctx.Context(), &view)
 	if err != nil {
 		ctx.Error(err)
 

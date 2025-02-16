@@ -6,9 +6,10 @@ require (
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/go-telegram/bot v1.13.3
 	github.com/golang-cz/devslog v0.0.11
-	github.com/opoccomaxao/tg-instrumentation v0.0.0-20250215191908-205de54a541a
+	github.com/opoccomaxao/tg-instrumentation v0.0.0-20250216010747-3127230601a3
 	github.com/orandin/slog-gorm v1.4.0
 	github.com/pkg/errors v0.9.1
+	github.com/samber/lo v1.49.1
 	go.uber.org/fx v1.23.0
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.25.12
@@ -22,5 +23,5 @@ require (
 	go.uber.org/multierr v1.10.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/text v0.16.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
 )

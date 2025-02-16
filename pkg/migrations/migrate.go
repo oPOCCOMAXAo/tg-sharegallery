@@ -10,8 +10,6 @@ import (
 
 type User struct {
 	models.User
-
-	CurrentAlbum *Album `gorm:"foreignKey:CurrentAlbumID"`
 }
 
 type Album struct {

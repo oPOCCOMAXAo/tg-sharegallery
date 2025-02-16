@@ -1,4 +1,4 @@
-package menu
+package albums
 
 import (
 	"github.com/opoccomaxao/tg-instrumentation/apimodels"
@@ -8,7 +8,7 @@ import (
 )
 
 func Module() fx.Option {
-	return fx.Module("handlers/menu",
+	return fx.Module("handlers/albums",
 		fx.Provide(fx.Private, NewService),
 		fx.Invoke(RegisterHandlers),
 	)
@@ -19,25 +19,17 @@ func RegisterHandlers(
 	router *pkgrouter.Router,
 ) error {
 	router.
-		Text("/start",
+		Text("/albums",
 			middleware.RequiredPrivateChat,
-			service.Start,
+			service.Albums,
 		).
-		WithDescription(apimodels.LCEn, apimodels.CSAllPrivateChats, "Start").
-		WithDescription(apimodels.LCUk, apimodels.CSAllPrivateChats, "Запуск")
+		WithDescription(apimodels.LCAll, apimodels.CSAllPrivateChats, "View my albums").
+		WithDescription(apimodels.LCUk, apimodels.CSAllPrivateChats, "Переглянути мої альбоми")
 
-	router.
-		Text("/help",
-			middleware.RequiredPrivateChat,
-			service.Help,
-		).
-		WithDescription(apimodels.LCEn, apimodels.CSAllPrivateChats, "Help").
-		WithDescription(apimodels.LCUk, apimodels.CSAllPrivateChats, "Допомога")
-
-	router.Callback("menu",
+	router.Callback("albums",
 		pkgrouter.AutoAnswerCallbackQuery(),
 		middleware.RequiredCallbackMessage,
-		service.Menu,
+		service.MenuAlbums,
 	)
 
 	return nil

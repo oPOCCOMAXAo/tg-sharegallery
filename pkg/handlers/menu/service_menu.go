@@ -1,8 +1,6 @@
 package menu
 
 import (
-	"context"
-
 	"github.com/opoccomaxao/tg-instrumentation/router"
 	"github.com/opoccomaxao/tg-sharegallery/pkg/views"
 )
@@ -18,14 +16,14 @@ func (s *Service) Menu(ctx *router.Context) {
 	update := ctx.Update()
 
 	view := views.Menu{
-		ChatID:    update.CallbackQuery.Message.Message.Chat.ID,
+		UserID:    update.CallbackQuery.Message.Message.Chat.ID,
 		MessageID: int64(update.CallbackQuery.Message.Message.ID),
 	}
 
 	query := ctx.Query()
 	query.GetInto("page", (*string)(&view.Page))
 
-	err := s.fillMenuView(ctx.Context(), &view)
+	err := s.fillMenuView(ctx, &view)
 	if err != nil {
 		ctx.Error(err)
 
@@ -36,7 +34,7 @@ func (s *Service) Menu(ctx *router.Context) {
 }
 
 func (s *Service) fillMenuView(
-	_ context.Context,
+	_ *router.Context,
 	view *views.Menu,
 ) error {
 	if view.Page == "" {
